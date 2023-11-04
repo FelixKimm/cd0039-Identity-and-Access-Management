@@ -17,7 +17,7 @@ CORS(app)
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 !! Running this funciton will add one
 '''
-# db_drop_and_create_all()
+db_drop_and_create_all()
 
 # ROUTES
 '''
@@ -30,6 +30,7 @@ CORS(app)
 '''
 @app.route('/drinks')
 def get_drinks():
+
     drinks = Drink.query.all()
 
     short_drink = [drink.short() for drink in drinks]
@@ -38,6 +39,7 @@ def get_drinks():
         'success': True,
         'drinks': short_drink
     })
+
 
 '''
 @TODO implement endpoint
@@ -51,6 +53,7 @@ def get_drinks():
 @app.route('/drinks-detail')
 @requires_auth('get:drinks-detail')
 def get_drinks_detail(payload):
+
     drinks = Drink.query.all()
 
     long_drink = [drink.long()for drink in drinks]
@@ -69,6 +72,30 @@ def get_drinks_detail(payload):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
+
+@app.route('/drinks', methods=["POST"])
+@requires_auth('post:drinks')
+def post_drinks(payload):
+    body = request.get_json()
+
+    new_title = body.get('title')
+    new_recipe = body.get('recipe')
+
+    if not ('title' in body and 'recipe' in body):
+        abort(422)
+
+    try:
+        new_drink = Drink(title=new_title, recipe=new_recipe)
+
+        new_drink.insert()
+
+        return jsonify({
+            'success': True,
+            'drinks': [new_drink.long()]
+        })
+
+    except:
+        abort(422)
 
 
 '''
