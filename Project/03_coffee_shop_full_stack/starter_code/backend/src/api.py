@@ -17,7 +17,7 @@ CORS(app)
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 !! Running this funciton will add one
 '''
-# db_drop_and_create_all()
+db_drop_and_create_all()
 
 # ROUTES
 '''
@@ -108,10 +108,30 @@ def post_drinks(payload):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
-# @app.route('/drinks/<int:id>', methods=["PATCH"])
-# @requires_auth('patch:drinks')
-# def patch_drinks(paylods, id):
-# #     patch_drink = Drink.query.get(id)
+@app.route('/drinks/<int:id>', methods=["PATCH"])
+@requires_auth('patch:drinks')
+def patch_drinks(paylods, id):
+    
+    body = request.get_json()
+
+    patch_drink = Drink.query.get(id)
+
+    patch_title = body.get('title', None)
+    patch_recipe = body.get('recipe', None)
+
+    if patch_drink == None:
+        abort(404)
+
+    if patch_title:
+        patch_drink.title = patch_title
+
+    if patch_recipe:
+        patch_drink.recipe = json.dumps(patch_recipe)
+
+    return jsonify({
+        "success": True,
+        "drinks": [patch_drink.long()]
+    })
 
 '''
 @TODO implement endpoint
@@ -194,3 +214,6 @@ def server_error(error):
 @TODO implement error handler for AuthError
     error handler should conform to general task above
 '''
+@app.errorhandler(AuthError)
+def autherror():
+    return jsonify({"success": False, "error": 401, "message": "server error"}), 401
