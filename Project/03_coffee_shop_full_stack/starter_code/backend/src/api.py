@@ -128,6 +128,8 @@ def patch_drinks(payload, id):
     if patch_recipe:
         patch_drink.recipe = json.dumps(patch_recipe)
 
+    patch_drink.update()
+
     return jsonify({
         "success": True,
         "drinks": [patch_drink.long()]
