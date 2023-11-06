@@ -176,6 +176,10 @@ Example error handling for unprocessable entity
 def bad_request(error):
     return jsonify({"success": False, "error": 400, "message": "bad request"}), 400
 
+@app.errorhandler(401)
+def bad_request(error):
+    return jsonify({"success": False, "error": 401, "message": "Unathorized"}), 401
+
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({"success": False, "error": 404, "message": "resource not found"}), 404
