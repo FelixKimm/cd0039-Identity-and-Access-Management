@@ -56,7 +56,7 @@ def get_drinks_detail(payload):
 
     drinks = Drink.query.all()
 
-    long_drink = [drink.long()for drink in drinks]
+    long_drink = [drink.long() for drink in drinks]
 
     return jsonify({
         'success': True,
@@ -110,7 +110,7 @@ def post_drinks(payload):
 '''
 @app.route('/drinks/<int:id>', methods=["PATCH"])
 @requires_auth('patch:drinks')
-def patch_drinks(paylods, id):
+def patch_drinks(payload, id):
     
     body = request.get_json()
 
@@ -146,7 +146,7 @@ def patch_drinks(paylods, id):
 
 @app.route('/drinks/<int:id>', methods=["DELETE"])
 @requires_auth('delete:drinks')
-def patch_drinks(paylods, id):
+def delete_drinks(payload, id):
 
     try:
         delete_drink = Drink.query.get(id)
