@@ -17,7 +17,7 @@ CORS(app)
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 !! Running this funciton will add one
 '''
-db_drop_and_create_all()
+# db_drop_and_create_all()
 
 # ROUTES
 '''
@@ -76,27 +76,26 @@ def get_drinks_detail(payload):
 @app.route('/drinks', methods=["POST"])
 @requires_auth('post:drinks')
 def post_drinks(payload):
+
     body = request.get_json()
 
-    new_title = body.get('title')
-    new_recipe = body.get('recipe')
+    new_title = body.get('title', None)
+    new_recipe = body.get('recipe', None)
 
     if not ('title' in body and 'recipe' in body):
         abort(422)
-
+    
     try:
-        new_drink = Drink(title=new_title, recipe=new_recipe)
-
+        new_drink = Drink(title=new_title, recipe=json.dumps(new_recipe))
         new_drink.insert()
-
-        return jsonify({
-            'success': True,
-            'drinks': [new_drink.long()]
-        })
 
     except:
         abort(422)
-
+    
+    return jsonify({
+        'success': True,
+        'drinks': [new_drink.long()]
+    })
 
 '''
 @TODO implement endpoint
@@ -109,7 +108,10 @@ def post_drinks(payload):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
-
+# @app.route('/drinks/<int:id>', methods=["PATCH"])
+# @requires_auth('patch:drinks')
+# def patch_drinks(paylods, id):
+# #     patch_drink = Drink.query.get(id)
 
 '''
 @TODO implement endpoint
@@ -122,6 +124,27 @@ def post_drinks(payload):
         or appropriate status code indicating reason for failure
 '''
 
+@app.route('/drinks/<int:id>', methods=["DELETE"])
+@requires_auth('delete:drinks')
+def patch_drinks(paylods, id):
+
+    try:
+        delete_drink = Drink.query.get(id)
+
+        if delete_drink == None:
+            abort(404)
+
+        delete_drink.delete()
+
+        return jsonify({
+            "success": True,
+            "delete": id
+        })
+        
+    except:
+        abort(422)
+
+
 
 # Error Handling
 '''
@@ -129,13 +152,25 @@ Example error handling for unprocessable entity
 '''
 
 
+@app.errorhandler(400)
+def bad_request(error):
+    return jsonify({"success": False, "error": 400, "message": "bad request"}), 400
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({"success": False, "error": 404, "message": "resource not found"}), 404
+
+@app.errorhandler(405)
+def not_allowed(error):
+    return jsonify({"success": False, "error": 405, "message": "method not allowed"}), 405
+
 @app.errorhandler(422)
 def unprocessable(error):
-    return jsonify({
-        "success": False,
-        "error": 422,
-        "message": "unprocessable"
-    }), 422
+    return jsonify({"success": False, "error": 422, "message": "unprocessable"}), 422
+
+@app.errorhandler(500)
+def server_error(error):
+    return jsonify({"success": False, "error": 500, "message": "server error"}), 500
 
 
 '''
