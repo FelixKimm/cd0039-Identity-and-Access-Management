@@ -221,5 +221,5 @@ def server_error(error):
     error handler should conform to general task above
 '''
 @app.errorhandler(AuthError)
-def autherror():
+def autherror(error):
     return jsonify({"success": False, "error": 401, "message": "server error"}), 401
